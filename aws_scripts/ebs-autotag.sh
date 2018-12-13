@@ -67,13 +67,13 @@ done
 if ${tag_instance_type}; 
 then
 	echo "Detected ${instance_type} instance. Appending Tag to volume."
-	add_tags="Key='instance-type',Value=${instance_type} ${add_tags}"
+	add_tags="Key='instance-type',Value='${instance_type}' ${add_tags}"
 fi
 
 if ${tag_ami_id};
 then    
         echo "Detected ${ami_id} image. Appending Tag to volume."
-        add_tags="Key='ami-id',Value=${ami_id} ${add_tags}"
+        add_tags="Key='ami-id',Value='${ami_id}' ${add_tags}"
 fi
 
 # command to assign tags to all volumes
