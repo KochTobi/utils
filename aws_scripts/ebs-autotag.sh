@@ -15,6 +15,7 @@
 # REQUIREMENTS
 #
 # * awscli installed on your EC2 instance / the ami
+# * awk
 ###
 
 
@@ -27,15 +28,22 @@ region='--region us-east-1'
 # Tags to be excluded 
 excluded_tags=('Name')
 
+tag_instance_type=true
+tag_ami_id=true
+
 echo "Retrieving info for ${instance_id}"
 
 # Retrieve info for current instance
 instance_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`]" --out text) 
+# Get intance type
+ami_id=$(echo "${instance_info}" | awk 'NR==1{print $6}')
+instance_type=$(echo "${instance_info}" | awk 'NR==1{print $8}')
+
 # retrieve all volumeIds attached to the current machine
 volume_ids=$(echo "${instance_info}" | grep EBS | grep attached | awk '{print $5}')
 
-echo "Found the following attached volumes:"
-echo ${volume_ids[@]}
+echo "Found the attached volumes:"
+echo "${volume_ids[@]}"
 
 # retrieve all tags of the current machine
 # get all Keys
@@ -56,8 +64,20 @@ do
        	add_tags="Key='${key}',Value='$(echo "$instance_info" |grep TAGS | grep ${key} | awk -F $'\t' '{print $3}')' ${add_tags}";
 done
 
+if ${tag_instance_type}; 
+then
+	echo "Detected ${instance_type} instance. Appending Tag to volume."
+	add_tags="Key='instance-type',Value=${instance_type} ${add_tags}"
+fi
+
+if ${tag_ami_id};
+then    
+        echo "Detected ${ami_id} image. Appending Tag to volume."
+        add_tags="Key='ami-id',Value=${ami_id} ${add_tags}"
+fi
+
 # command to assign tags to all volumes
 command="${aws_cli} ec2 create-tags ${region} --resources "${volume_ids[@]}" --tags "${add_tags}
-echo ${command}
+echo "Executing ${command}"
 eval ${command}
 
