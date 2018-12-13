@@ -41,7 +41,7 @@ add_tags=''
 
 for key in ${filtered_keys[@]};
 do
-       	add_tags="Key=\'${key}\',Value=\'$(echo "$instance_info" |grep TAGS | grep ${key} | awk -F $'\t' '{print $3}')\' ${add_tags}";
+       	add_tags="Key='${key}',Value='$(echo "$instance_info" |grep TAGS | grep ${key} | awk -F $'\t' '{print $3}')' ${add_tags}";
 done
 
 echo ${add_tags}
