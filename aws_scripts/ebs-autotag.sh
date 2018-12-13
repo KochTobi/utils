@@ -35,13 +35,13 @@ instance_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${inst
 volume_ids=$(echo "${instance_info}" | grep EBS | grep attached | awk '{print $5}')
 
 echo "Found the following attached volumes:"
-echo "${volume_ids[@]}"
+echo ${volume_ids[@]}
 
 # retrieve all tags of the current machine
 # get all Keys
 keys=$(echo "${instance_info}" |grep TAGS| awk -F $'\t' '{print $2}')
 
-echo "Instance tags: ${keys[@]}"
+echo "Instance tags: " ${keys[@]}
 
 # iterate over keys and exclude unwanted keys
 filtered_keys=($(comm -3 <(for x in ${keys[@]}; do echo ${x}; done | sort) <(for x in ${excluded_tags[@]}; do echo ${x}; done | sort)))
