@@ -56,6 +56,8 @@ do
        	add_tags="Key='${key}',Value='$(echo "$instance_info" |grep TAGS | grep ${key} | awk -F $'\t' '{print $3}')' ${add_tags}";
 done
 
-echo ${add_tags}
+# command to assign tags to all volumes
+command="${aws_cli} ec2 create-tags --resources "${volume_ids[@]}" --tags "${add_tags}
+echo $command
 
 
