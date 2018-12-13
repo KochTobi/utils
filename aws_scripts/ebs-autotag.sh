@@ -28,7 +28,7 @@ region='--region us-east-1'
 excluded_tags=('Name')
 
 # Retrieve info for current instance
-instance_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`]" --out text 
+instance_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`]" --out text) 
 # retrieve all volumeIds attached to the current machine
 volume_ids=$(echo "${instance_info}" | grep EBS | awk '{print $5}')
 # retrieve all tags of the current machine
