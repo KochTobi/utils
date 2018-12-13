@@ -57,7 +57,7 @@ do
 done
 
 # command to assign tags to all volumes
-command="${aws_cli} ec2 create-tags --resources "${volume_ids[@]}" --tags "${add_tags}
+command="${aws_cli} ec2 create-tags ${region} --resources "${volume_ids[@]}" --tags "${add_tags}
 echo ${command}
 eval ${command}
 
