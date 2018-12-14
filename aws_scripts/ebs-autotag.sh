@@ -19,6 +19,8 @@
 # * awk
 ###
 
+# set logfile location
+logfile='/var/logs/boothook.log'
 # metadate retrieval free of charge on ip 169.254.269.254
 instance_id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
 # location of the awscli installation. Default assumes availability in PATH.
@@ -31,7 +33,12 @@ excluded_tags=('Name')
 tag_instance_type=true
 tag_ami_id=true
 
-echo "Retrieving info for ${instance_id}"
+# function to log messages to logfile message=$1
+function log {
+	echo "$1" | tee -a ${logfile}
+}
+
+log "Retrieving info for ${instance_id}"
 
 # Retrieve info for current instance
 instance_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`]" --out text) 
@@ -42,19 +49,19 @@ instance_type=$(echo "${instance_info}" | awk 'NR==1{print $8}')
 # retrieve all volumeIds attached to the current machine
 volume_ids=$(echo "${instance_info}" | grep EBS | grep attached | awk '{print $5}')
 
-echo "Found the attached volumes:"
-echo "${volume_ids[@]}"
+log "Found the attached volumes:"
+log "${volume_ids[@]}"
 
 # retrieve all tags of the current machine
 # get all Keys
 keys=$(echo "${instance_info}" |grep TAGS| awk -F $'\t' '{print $2}')
 
-echo "Instance tags: " ${keys[@]}
+log "Instance tags: " ${keys[@]}
 
 # iterate over keys and exclude unwanted keys
 filtered_keys=($(comm -3 <(for x in ${keys[@]}; do echo ${x}; done | sort) <(for x in ${excluded_tags[@]}; do echo ${x}; done | sort)))
 
-echo "Ignoring ${excluded_tags[@]} and proceeding with ${filtered_keys[@]}"
+log "Ignoring ${excluded_tags[@]} and proceeding with ${filtered_keys[@]}"
 
 # create Key:key,Values:value string
 add_tags=''
@@ -66,18 +73,18 @@ done
 
 if ${tag_instance_type}; 
 then
-	echo "Detected ${instance_type} instance. Appending Tag to volume."
+	log "Detected ${instance_type} instance. Appending Tag to volume."
 	add_tags="Key='instance-type',Value='${instance_type}' ${add_tags}"
 fi
 
 if ${tag_ami_id};
 then    
-        echo "Detected ${ami_id} image. Appending Tag to volume."
+        log "Detected ${ami_id} image. Appending Tag to volume."
         add_tags="Key='ami-id',Value='${ami_id}' ${add_tags}"
 fi
 
 # command to assign tags to all volumes
 command="${aws_cli} ec2 create-tags ${region} --resources "${volume_ids[@]}" --tags "${add_tags}
-echo "Executing ${command}"
+log "Executing ${command}"
 eval ${command}
 
