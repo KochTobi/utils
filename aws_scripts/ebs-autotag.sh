@@ -59,7 +59,10 @@ keys=$(echo "${instance_info}" |grep TAGS| awk -F $'\t' '{print $2}')
 log "Instance tags: " ${keys[@]}
 
 # iterate over keys and exclude unwanted keys
-filtered_keys=($(comm -3 <(for x in ${keys[@]}; do echo ${x}; done | sort) <(for x in ${excluded_tags[@]}; do echo ${x}; done | sort)))
+# process substitution not advisable with root access
+filtered_keys=( $(${keys[@]} ${excluded_tags[@]} | tr ' ' '\n' | sort | uniq -u) )
+
+#filtered_keys=($(comm -3 <(for x in ${keys[@]}; do echo ${x}; done | sort) <(for x in ${excluded_tags[@]}; do echo ${x}; done | sort)))
 
 log "Ignoring ${excluded_tags[@]} and proceeding with ${filtered_keys[@]}"
 
