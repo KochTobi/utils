@@ -20,7 +20,7 @@
 ###
 
 # set logfile location
-logfile='/var/logs/boothook.log'
+logfile='/var/log/boothook.log'
 # metadate retrieval free of charge on ip 169.254.269.254
 instance_id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
 # location of the awscli installation. Default assumes availability in PATH.
