@@ -1,3 +1,12 @@
+Content-Type: multipart/mixed; boundary="===============2320702581322049879=="
+MIME-Version: 1.0
+
+--===============2320702581322049879==
+Content-Type: text/cloud-boothook; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="ebs-autotag.sh"
+
 #cloud-boothook
 #! /usr/bin/env bash
 ###
@@ -82,3 +91,5 @@ command="${aws_cli} ec2 create-tags ${region} --resources "${volume_ids[@]}" --t
 echo "Executing ${command}"
 eval ${command}
 
+
+--===============2320702581322049879==--
