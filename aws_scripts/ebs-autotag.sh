@@ -15,15 +15,14 @@
 ###
 # REQUIREMENTS
 #
-# * awscli installed on your EC2 instance / the ami
+# * awscli installed on your EC2 instance under /home/ec2-user/miniconda/bin/
 # * awk
 ###
-export PATH=$PATH:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/opt/aws/bin
 
 # metadate retrieval free of charge on ip 169.254.269.254
 instance_id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
 # location of the awscli installation. Default assumes availability in PATH.
-aws_cli='aws'
+aws_cli='/home/ec2-user/miniconda/bin/aws'
 # region defaults to Virginia normally there is no preconfigured awscli on EC2 instances
 region='--region us-east-1'
 # Tags to be excluded 
