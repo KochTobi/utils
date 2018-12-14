@@ -18,7 +18,7 @@
 # * awscli installed on your EC2 instance / the ami
 # * awk
 ###
-
+export PATH=$PATH:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/opt/aws/bin
 
 # metadate retrieval free of charge on ip 169.254.269.254
 instance_id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
