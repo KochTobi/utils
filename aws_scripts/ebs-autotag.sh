@@ -56,11 +56,11 @@ log "${volume_ids[@]}"
 # get all Keys
 keys=$(echo "${instance_info}" |grep TAGS| awk -F $'\t' '{print $2}')
 
-log "Instance tags: " ${keys[@]}
+log "Instance tags: ${keys[@]}"
 
 # iterate over keys and exclude unwanted keys
 # process substitution not advisable with root access
-filtered_keys=( $(${keys[@]} ${excluded_tags[@]} | tr ' ' '\n' | sort | uniq -u) )
+filtered_keys=( `echo ${keys[@]} ${excluded_tags[@]} | tr ' ' '\n' | sort | uniq -u` )
 
 #filtered_keys=($(comm -3 <(for x in ${keys[@]}; do echo ${x}; done | sort) <(for x in ${excluded_tags[@]}; do echo ${x}; done | sort)))
 
