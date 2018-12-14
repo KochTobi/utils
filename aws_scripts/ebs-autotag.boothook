@@ -1,7 +1,7 @@
-Content-Type: multipart/mixed; boundary="===============2320702581322049879=="
+Content-Type: multipart/mixed; boundary="===============2575467969998283821=="
 MIME-Version: 1.0
 
---===============2320702581322049879==
+--===============2575467969998283821==
 Content-Type: text/cloud-boothook; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -27,7 +27,7 @@ Content-Disposition: attachment; filename="ebs-autotag.sh"
 # * awscli installed on your EC2 instance / the ami
 # * awk
 ###
-
+export PATH=$PATH:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/opt/aws/bin
 
 # metadate retrieval free of charge on ip 169.254.269.254
 instance_id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
@@ -92,4 +92,4 @@ echo "Executing ${command}"
 eval ${command}
 
 
---===============2320702581322049879==--
+--===============2575467969998283821==--
