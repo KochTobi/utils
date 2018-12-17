@@ -28,7 +28,8 @@ aws_cli='/home/ec2-user/miniconda/bin/aws'
 # region defaults to Virginia normally there is no preconfigured awscli on EC2 instances
 region='--region us-east-1'
 # Tags to be excluded
-excluded_tags=('aws:ec2launchtemplate:version' 'Name' 'aws:ec2launchtemplate:id')
+#excluded_tags=('aws:ec2launchtemplate:version' 'aws:ec2spot:fleet-request-id' 'aws:ec2launchtemplate:id' 'Name')
+excluded_tags=('Name')
 
 tag_instance_type=true
 tag_ami_id=true
@@ -53,8 +54,8 @@ log "Found the attached volumes:"
 log "${volume_ids[@]}"
 
 # retrieve all tags of the current machine
-# get all Keys
-keys=$(echo "${instance_info}" |grep TAGS| awk -F $'\t' '{print $2}')
+# get all Keys filter for aws preserved keys
+keys=$(echo "${instance_info}" |grep TAGS| awk -F $'\t' '{print $2}' | awk '!/aws:/ {print}' )
 
 log "Instance tags: ${keys[@]}"
 
