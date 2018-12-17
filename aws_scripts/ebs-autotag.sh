@@ -43,7 +43,7 @@ log "Retrieving info for ${instance_id}"
 
 # Retrieve info for current instance
 columns="InstanceId, ImageId, InstanceType, BlockDeviceMappings"
-instance_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`].[${requested_columns}]" --out text)
+instance_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`].[${columns}]" --out text)
 # Get intance type
 ami_id=$(echo "${instance_info}" | awk 'NR==1{print $2}')
 instance_type=$(echo "${instance_info}" | awk 'NR==1{print $3}')
