@@ -79,7 +79,7 @@ add_tags=''
 
 for key in ${filtered_keys[@]};
 do
-       	add_tags="Key='${key}',Value='$(echo "$instance_info" |grep TAGS | grep ${key} | awk -F $'\t' '{print $3}')' ${add_tags}";
+       	add_tags="Key='${key}',Value='$(echo "${tag_info}" |grep TAGS | grep ${key} | awk -F $'\t' '{print $3}')' ${add_tags}";
 done
 
 if ${tag_instance_type};
