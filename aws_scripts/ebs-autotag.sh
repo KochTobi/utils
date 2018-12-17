@@ -4,7 +4,7 @@
 # This script is ment to be run on EC2 instance start. It will check all
 # attached volumes for non-empty specified tag-keys and assign the values
 # provided by the instance this script is run on.
-# 
+#
 # resources:
 # * https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-tags.html
 # * https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
@@ -27,8 +27,8 @@ instance_id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
 aws_cli='/home/ec2-user/miniconda/bin/aws'
 # region defaults to Virginia normally there is no preconfigured awscli on EC2 instances
 region='--region us-east-1'
-# Tags to be excluded 
-excluded_tags=('Name')
+# Tags to be excluded
+excluded_tags=('aws:ec2launchtemplate:version' 'Name' 'aws:ec2launchtemplate:id')
 
 tag_instance_type=true
 tag_ami_id=true
@@ -41,10 +41,10 @@ function log {
 log "Retrieving info for ${instance_id}"
 
 # Retrieve info for current instance
-instance_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`]" --out text) 
+instance_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`]" --out text)
 # Get intance type
-ami_id=$(echo "${instance_info}" | awk 'NR==1{print $6}')
-instance_type=$(echo "${instance_info}" | awk 'NR==1{print $8}')
+ami_id=$(echo "${instance_info}" | awk 'NR==1{print $7}')
+instance_type=$(echo "${instance_info}" | awk 'NR==1{print $10}')
 
 # retrieve all volumeIds attached to the current machine
 volume_ids=$(echo "${instance_info}" | grep EBS | grep attached | awk '{print $5}')
@@ -78,14 +78,14 @@ do
        	add_tags="Key='${key}',Value='$(echo "$instance_info" |grep TAGS | grep ${key} | awk -F $'\t' '{print $3}')' ${add_tags}";
 done
 
-if ${tag_instance_type}; 
+if ${tag_instance_type};
 then
 	log "Detected ${instance_type} instance. Appending Tag to volume."
 	add_tags="Key='instance-type',Value='${instance_type}' ${add_tags}"
 fi
 
 if ${tag_ami_id};
-then    
+then
         log "Detected ${ami_id} image. Appending Tag to volume."
         add_tags="Key='ami-id',Value='${ami_id}' ${add_tags}"
 fi
@@ -94,4 +94,3 @@ fi
 command="${aws_cli} ec2 create-tags ${region} --resources "${volume_ids[@]}" --tags "${add_tags}
 log "Executing ${command}"
 eval ${command}
-
