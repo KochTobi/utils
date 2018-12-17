@@ -1,7 +1,7 @@
-Content-Type: multipart/mixed; boundary="===============4225819920968316862=="
+Content-Type: multipart/mixed; boundary="===============0892195051401296410=="
 MIME-Version: 1.0
 
---===============4225819920968316862==
+--===============0892195051401296410==
 Content-Type: text/cloud-boothook; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -37,7 +37,8 @@ aws_cli='/home/ec2-user/miniconda/bin/aws'
 # region defaults to Virginia normally there is no preconfigured awscli on EC2 instances
 region='--region us-east-1'
 # Tags to be excluded
-excluded_tags=('aws:ec2launchtemplate:version' 'Name' 'aws:ec2launchtemplate:id')
+#excluded_tags=('aws:ec2launchtemplate:version' 'aws:ec2spot:fleet-request-id' 'aws:ec2launchtemplate:id' 'Name')
+excluded_tags=('Name')
 
 tag_instance_type=true
 tag_ami_id=true
@@ -50,10 +51,11 @@ function log {
 log "Retrieving info for ${instance_id}"
 
 # Retrieve info for current instance
-instance_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`]" --out text)
+columns="InstanceId, ImageId, InstanceType, BlockDeviceMappings"
+instance_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`].[${columns}]" --out text)
 # Get intance type
-ami_id=$(echo "${instance_info}" | awk 'NR==1{print $7}')
-instance_type=$(echo "${instance_info}" | awk 'NR==1{print $10}')
+ami_id=$(echo "${instance_info}" | awk 'NR==1{print $2}')
+instance_type=$(echo "${instance_info}" | awk 'NR==1{print $3}')
 
 # retrieve all volumeIds attached to the current machine
 volume_ids=$(echo "${instance_info}" | grep EBS | grep attached | awk '{print $5}')
@@ -61,9 +63,11 @@ volume_ids=$(echo "${instance_info}" | grep EBS | grep attached | awk '{print $5
 log "Found the attached volumes:"
 log "${volume_ids[@]}"
 
+# get information for tag retrieval
+tag_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`]" --out text)
 # retrieve all tags of the current machine
-# get all Keys
-keys=$(echo "${instance_info}" |grep TAGS| awk -F $'\t' '{print $2}')
+# get all Keys filter for aws preserved keys
+keys=$(echo "${tag_info}" |grep TAGS| awk -F $'\t' '{print $2}' | awk '!/aws:/ {print}' )
 
 log "Instance tags: ${keys[@]}"
 
@@ -84,7 +88,7 @@ add_tags=''
 
 for key in ${filtered_keys[@]};
 do
-       	add_tags="Key='${key}',Value='$(echo "$instance_info" |grep TAGS | grep ${key} | awk -F $'\t' '{print $3}')' ${add_tags}";
+       	add_tags="Key='${key}',Value='$(echo "${tag_info}" |grep TAGS | grep ${key} | awk -F $'\t' '{print $3}')' ${add_tags}";
 done
 
 if ${tag_instance_type};
@@ -104,4 +108,4 @@ command="${aws_cli} ec2 create-tags ${region} --resources "${volume_ids[@]}" --t
 log "Executing ${command}"
 eval ${command}
 
---===============4225819920968316862==--
+--===============0892195051401296410==--
