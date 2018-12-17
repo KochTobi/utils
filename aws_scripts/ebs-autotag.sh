@@ -64,7 +64,11 @@ filtered_keys=( `echo ${keys[@]} ${excluded_tags[@]} ${excluded_tags[@]} | tr ' 
 ## process substitution does not work for root
 #filtered_keys=($(comm -3 <(for x in ${keys[@]}; do echo ${x}; done | sort) <(for x in ${excluded_tags[@]}; do echo ${x}; done | sort)))
 
-log "Ignoring ${excluded_tags[@]} and proceeding with ${filtered_keys[@]}"
+log 'Ignoring:'
+for tag in ${excluded_tags[@]};
+do
+	log ${tag}
+done
 
 # create Key:key,Values:value string
 add_tags=''
