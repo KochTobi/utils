@@ -42,10 +42,11 @@ function log {
 log "Retrieving info for ${instance_id}"
 
 # Retrieve info for current instance
-instance_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`]" --out text)
+columns="InstanceId, ImageId, InstanceType, BlockDeviceMappings"
+instance_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`].[${requested_columns}]" --out text)
 # Get intance type
-ami_id=$(echo "${instance_info}" | awk 'NR==1{print $7}')
-instance_type=$(echo "${instance_info}" | awk 'NR==1{print $10}')
+ami_id=$(echo "${instance_info}" | awk 'NR==1{print $2}')
+instance_type=$(echo "${instance_info}" | awk 'NR==1{print $3}')
 
 # retrieve all volumeIds attached to the current machine
 volume_ids=$(echo "${instance_info}" | grep EBS | grep attached | awk '{print $5}')
@@ -53,9 +54,11 @@ volume_ids=$(echo "${instance_info}" | grep EBS | grep attached | awk '{print $5
 log "Found the attached volumes:"
 log "${volume_ids[@]}"
 
+# get information for tag retrieval
+tag_info=$(${aws_cli} ec2 describe-instances ${region} --instance-id ${instance_id} --query "Reservations[*].Instances[?InstanceId==\`${instance_id}\`]" --out text)
 # retrieve all tags of the current machine
 # get all Keys filter for aws preserved keys
-keys=$(echo "${instance_info}" |grep TAGS| awk -F $'\t' '{print $2}' | awk '!/aws:/ {print}' )
+keys=$(echo "${tag_info}" |grep TAGS| awk -F $'\t' '{print $2}' | awk '!/aws:/ {print}' )
 
 log "Instance tags: ${keys[@]}"
 
