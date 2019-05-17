@@ -50,6 +50,9 @@ parameters.add_argument('-p', '--pattern', type=str, nargs=1, metavar='pattern',
 
 
 def compute_cksum(files):
+    if not files:
+        print('no files given: %s' % str(files))
+        return []
     computed_cksum_lines = []
     cmd = ["cksum"]
     cmd.extend(files)
@@ -101,12 +104,12 @@ def main(argv):
 
     with open(output_file + '.identical.tsv', 'w+') as outfile:
         for line in sorted(identical_files_from_directories, key=lambda line: line[2][::-1]):
-            outfile.write("%s\t%s" % (str(line[0]), line[2]))
+            outfile.write("%s\t%s\t%s" % (str(line[0]), str(line[1]), line[2]))
             outfile.write(os.linesep)
 
     with open(output_file + '.different.tsv', 'w+') as outfile:
         for line in sorted(different_files_from_directories, key=lambda line: line[2][::-1]):
-            outfile.write("%s\t%s" % (str(line[0]), line[2]))
+            outfile.write("%s\t%s\t%s" % (str(line[0]), str(line[1]), line[2]))
             outfile.write(os.linesep)
 
     print('Similar files:\t%s' % len(identical_files_from_directories))
