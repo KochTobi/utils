@@ -4,6 +4,7 @@
 # Calaculates cksums and exports a csv file
 #####
 import argparse
+import datetime
 import fnmatch
 import json
 import os
@@ -16,6 +17,23 @@ __email__ = "t.koch.vs@web.de"
 __copyright__ = "Tobias Koch"
 __license__ = "The MIT License (MIT)"
 
+
+def get_simple_basename(sample):
+    if type(sample) == str:
+        return os.path.basename(sample).split('.')[0]
+
+def log_command_call():
+    cwd = os.getcwd()
+    log_file = os.path.join(cwd, datetime.date.today().isoformat())
+    log_file += "-%s-%s" % (str(datetime.datetime.today().hour), str(datetime.datetime.today().minute))
+    log_file += "-%s.cmd.sh" % get_simple_basename(sys.argv[0])
+    with open(log_file, 'a+') as logfile:
+        logfile.write('#!/usr/bin/env bash')
+        logfile.write(os.linesep)
+        logfile.write("#WORKING_DIRECTORY=%s" % cwd)
+        logfile.write(os.linesep)
+        logfile.write("python3 "+" ".join(sys.argv))
+        logfile.write(os.linesep)
 
 def run_cmd(command):
     result = {}
@@ -105,3 +123,4 @@ def main(argv):
 
 if __name__ == '__main__':
     main(sys.argv[1:])
+    log_command_call()
