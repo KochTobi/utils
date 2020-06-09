@@ -8,28 +8,35 @@ import gzip
 import os
 import sys
 
+
 class UnsupportedCompressionException(Exception):
     pass
+
 
 class UnexpectedLineCountException(Exception):
     pass
 
+
 class CompressedFastqFile:
-    fileCompressionToolMap = {".gz":gzip.open, ".bz2":bz2.open}
+    fileCompressionToolMap = {".gz": gzip.open, ".bz2": bz2.open}
+
     def __init__(self, filepath):
         extension = os.path.splitext(filepath)[1].lower()
         if extension not in self.fileCompressionToolMap:
-            raise  UnsupportedCompressionException("Unrecognized file extension. Please provide a .bz2 or .gz compressed file.")
+            raise UnsupportedCompressionException(
+                "Unrecognized file extension. Please provide a .bz2 or .gz compressed file."
+            )
         self.filepath = filepath
         self.fileCompressionTool = self.fileCompressionToolMap[extension]
 
     def count_reads(self):
         line_count = self.count_lines()
-        if line_count%4 == 0:
-            return line_count/4
+        if line_count % 4 == 0:
+            return line_count / 4
         else:
-            raise UnexpectedLineCountException("Number of lines " + str(line_count) + " not a multiple of 4.")
-        
+            raise UnexpectedLineCountException(
+                "Number of lines " + str(line_count) + " not a multiple of 4."
+            )
 
     def count_lines(self):
         with self.fileCompressionTool(self.filepath) as fileHandler:
@@ -37,17 +44,16 @@ class CompressedFastqFile:
             for _ in fileHandler:
                 lines += 1
             return lines
-        
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Count reads in fastq file.')
-    parser.add_argument('--file', nargs=1, help='a .bz2 or .gz compressed fastq file')
+    parser = argparse.ArgumentParser(description="Count reads in fastq file.")
+    parser.add_argument("--file", nargs=1, help="a .bz2 or .gz compressed fastq file")
 
     args = parser.parse_args()
     try:
         compressed_file = CompressedFastqFile(args.file[0])
         print(compressed_file.count_reads())
     except (UnsupportedCompressionException, UnexpectedLineCountException) as e:
-        print (e)
+        print(e)
         exit(1)
