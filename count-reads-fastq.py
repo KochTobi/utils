@@ -30,6 +30,7 @@ class CompressedFastqFile:
             )
         self.filepath = filepath
         self.fileCompressionTool = self.fileCompressionToolMap[extension]
+        print("Successfully created CompressedFastqFile for " + filepath)
 
     def count_reads(self):
         with LineSpinner('Reading file ') as spinner:
