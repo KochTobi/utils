@@ -8,8 +8,6 @@ import gzip
 import os
 import sys
 import re
-from progress.spinner import LineSpinner
-
 
 class UnsupportedCompressionException(Exception):
     pass
@@ -30,25 +28,24 @@ class CompressedFastqFile:
             )
         self.filepath = filepath
         self.fileCompressionTool = self.fileCompressionToolMap[extension]
-        print("Successfully created CompressedFastqFile for " + filepath)
 
     def count_reads(self):
-        with LineSpinner('Reading file ') as spinner:
-            with self.fileCompressionTool(self.filepath) as fileHandler:
-                line_count = 0
-                lines_with_only_plus = 0
-                for line in fileHandler:
-                    spinner.next()
-                    line_count += 1
-                    if (re.match('\+', line.decode())):
-                        lines_with_only_plus += 1
+        print(self.filepath + os.linesep + "\tOpening...")
+        with self.fileCompressionTool(self.filepath) as fileHandler:
+            line_count = 0
+            lines_with_only_plus = 0
+            print("\tTraversing lines...")
+            for line in fileHandler:
+                line_count += 1
+                if (re.match('^\+.*$', line.decode())):
+                    lines_with_only_plus += 1
 
-                if (line_count % 4 != 0):
-                    raise UnexpectedLineCountException( "Number of lines(" + str(line_count) + ") not a multiple of 4.")
-                elif (line_count / 4 != lines_with_only_plus):
-                    raise UnexpectedLineCountException( "Number of lines/4 (" + str(line_count / 4) +") and number of reads(" + str(lines_with_only_plus) + ") disagree.")
-                else:
-                    return lines_with_only_plus
+            if (line_count % 4 != 0):
+                raise UnexpectedLineCountException( "Number of lines(" + str(line_count) + ") not a multiple of 4.")
+            elif (line_count / 4 != lines_with_only_plus):
+                raise UnexpectedLineCountException( "Number of lines/4 (" + str(line_count / 4) +") and number of reads(" + str(lines_with_only_plus) + ") disagree.")
+            else:
+                return lines_with_only_plus
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Count reads in fastq file.")
